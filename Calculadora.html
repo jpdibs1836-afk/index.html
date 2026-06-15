@@ -1,0 +1,528 @@
+html<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CalcCompra - Seu Assistente de Mercado</title>
+    <style>
+        /* Variáveis de Design Moderno (Clean/Tech) */
+        :root {
+            --bg-app: #f4f7f6;
+            --surface: #ffffff;
+            --primary: #10b981; /* Verde moderno */
+            --primary-hover: #059669;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --border: #e5e7eb;
+            --accent: #6366f1; /* Roxo para ações secundárias */
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: var(--bg-app);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        /* Container do Aplicativo */
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            background-color: var(--surface);
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            min-height: 100vh;
+        }
+
+        /* Cabeçalho Fixo */
+        header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            background: var(--surface);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .header-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-main);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .total-badge {
+            background-color: var(--primary);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        /* Área de Exibição da Calculadora (Agora um Input Digito) */
+        .calc-screen-container {
+            padding: 15px 20px;
+            background: #f9fafb;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .calc-operation {
+            font-size: 14px;
+            color: var(--text-muted);
+            min-height: 20px;
+            margin-bottom: 4px;
+            text-align: right;
+        }
+
+        /* Input onde é possível digitar diretamente */
+        .calc-input-field {
+            width: 100%;
+            background: transparent;
+            border: none;
+            text-align: right;
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--text-main);
+            outline: none;
+            padding: 0;
+        }
+
+        /* Formulário de Identificação do Item */
+        .item-inputs {
+            padding: 15px 20px;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 10px;
+            background: var(--surface);
+        }
+
+        input {
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 15px;
+            outline: none;
+            background: #f9fafb;
+            transition: border 0.2s;
+        }
+
+        input:focus {
+            border-color: var(--accent);
+            background: white;
+        }
+
+        /* Teclado Numérico Adaptado */
+        .calc-keyboard {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            padding: 15px 20px;
+            background: #f9fafb;
+        }
+
+        button {
+            border: none;
+            border-radius: 12px;
+            height: 56px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.1s ease;
+            -webkit-tap-highlight-color: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        button:active {
+            transform: scale(0.96);
+            opacity: 0.8;
+        }
+
+        .btn-num {
+            background-color: var(--surface);
+            color: var(--text-main);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            border: 1px solid var(--border);
+        }
+
+        .btn-op {
+            background-color: #ede9fe;
+            color: var(--accent);
+        }
+
+        .btn-clear {
+            background-color: #fee2e2;
+            color: #ef4444;
+        }
+
+        /* Botão de apagar baseado no ícone enviado */
+        .btn-backspace {
+            background-color: #e6fbf4;
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .btn-backspace svg {
+            width: 26px;
+            height: 26px;
+        }
+
+        /* Botão Principal: Adicionar ao Carrinho */
+        .btn-add-cart {
+            grid-column: span 4;
+            background-color: var(--primary);
+            color: white;
+            font-size: 16px;
+            font-weight: 700;
+            height: 56px;
+            margin-top: 4px;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+        }
+
+        /* Lista de Compras (Carrinho) */
+        .cart-section {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            max-height: 320px;
+        }
+
+        .cart-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .cart-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: #f9fafb;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            animation: slideIn 0.2s ease-out;
+        }
+
+        .item-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .item-name {
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        .item-meta {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .item-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .item-price {
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .btn-delete {
+            background: none;
+            color: #ef4444;
+            font-size: 14px;
+            height: auto;
+            padding: 4px;
+        }
+
+        .empty-cart {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 30px 0;
+            font-size: 14px;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <header>
+            <div class="header-title">
+                <span>Meu Carrinho</span>
+                <span id="total-cart" class="total-badge">R$ 0,00</span>
+            </div>
+        </header>
+
+        <div class="calc-screen-container">
+            <div id="calc-operation" class="calc-operation"></div>
+            <input type="text" id="calc-current" class="calc-input-field" value="0" inputmode="decimal">
+        </div>
+
+        <div class="item-inputs">
+            <input type="text" id="item-name" placeholder="Nome do produto (ex: Leite)" autocomplete="off">
+            <input type="number" id="item-qty" placeholder="Qtd" value="1" min="1">
+        </div>
+
+        <div class="calc-keyboard">
+            <button class="btn-clear" onclick="clearCalc()">C</button>
+            <button class="btn-backspace" onclick="backspaceCalc()" title="Apagar último">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"></path>
+                    <line x1="18" y1="9" x2="12" y2="15"></line>
+                    <line x1="12" y1="9" x2="18" y2="15"></line>
+                </svg>
+            </button>
+            <button class="btn-op" onclick="appendOp('/')">/</button>
+            <button class="btn-op" onclick="appendOp('*')">×</button>
+
+            <button class="btn-num" onclick="appendNum('7')">7</button>
+            <button class="btn-num" onclick="appendNum('8')">8</button>
+            <button class="btn-num" onclick="appendNum('9')">9</button>
+            <button class="btn-op" onclick="appendOp('-')">-</button>
+
+            <button class="btn-num" onclick="appendNum('4')">4</button>
+            <button class="btn-num" onclick="appendNum('5')">5</button>
+            <button class="btn-num" onclick="appendNum('6')">6</button>
+            <button class="btn-op" onclick="appendOp('+')">+</button>
+
+            <button class="btn-num" onclick="appendNum('1')">1</button>
+            <button class="btn-num" onclick="appendNum('2')">2</button>
+            <button class="btn-num" onclick="appendNum('3')">3</button>
+            <button class="btn-op" onclick="calculate()">=</button>
+
+            <button class="btn-num" style="grid-column: span 2;" onclick="appendNum('0')">0</button>
+            <button class="btn-num" onclick="appendNum('.')">.</button>
+            <div style="visibility: hidden;"></div>
+
+            <button class="btn-add-cart" onclick="addToCart()">
+                🛒 Adicionar Preço ao Carrinho
+            </button>
+        </div>
+
+        <div class="cart-section">
+            <div class="cart-title">Itens Inclusos</div>
+            <ul id="cart-list" class="cart-list">
+                <div class="empty-cart" id="empty-msg">Nenhum item adicionado ainda.</div>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Elementos do DOM
+        const currentEl = document.getElementById('calc-current');
+        const operationEl = document.getElementById('calc-operation');
+        const cartListEl = document.getElementById('cart-list');
+        const totalCartEl = document.getElementById('total-cart');
+        const inputName = document.getElementById('item-name');
+        const inputQty = document.getElementById('item-qty');
+        const emptyMsg = document.getElementById('empty-msg');
+
+        let isResultDisplayed = false;
+        let cart = [];
+
+        // Permite que o usuário use o Enter do teclado nativo do celular para calcular
+        currentEl.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                calculate();
+            }
+        });
+
+        // Limpa o '0' inicial quando o usuário clica diretamente para digitar
+        currentEl.addEventListener('focus', function() {
+            if (currentEl.value === '0') {
+                currentEl.value = '';
+            }
+        });
+
+        // Garante que o campo volte a ter '0' caso o usuário apague tudo no teclado nativo
+        currentEl.addEventListener('blur', function() {
+            if (currentEl.value.trim() === '') {
+                currentEl.value = '0';
+            }
+        });
+
+        // Funções dos botões da tela da Calculadora
+        function appendNum(num) {
+            let currentDisplay = currentEl.value;
+            
+            if (currentDisplay === '0' && num !== '.' || isResultDisplayed) {
+                currentDisplay = num;
+                isResultDisplayed = false;
+            } else {
+                if (num === '.' && currentDisplay.includes('.')) return;
+                currentDisplay += num;
+            }
+            currentEl.value = currentDisplay;
+        }
+
+        function appendOp(op) {
+            if (isResultDisplayed) isResultDisplayed = false;
+            let currentDisplay = currentEl.value;
+            const lastChar = currentDisplay.trim().slice(-1);
+            
+            if (['+', '-', '*', '/'].includes(lastChar)) {
+                currentEl.value = currentDisplay.trim().slice(0, -1) + op;
+            } else {
+                currentEl.value = currentDisplay + op;
+            }
+        }
+
+        function clearCalc() {
+            currentEl.value = '0';
+            operationEl.innerText = '';
+        }
+
+        function backspaceCalc() {
+            let currentDisplay = currentEl.value;
+            
+            if (isResultDisplayed || currentDisplay === 'Erro') {
+                clearCalc();
+                isResultDisplayed = false;
+                return;
+            }
+            
+            currentDisplay = currentDisplay.slice(0, -1);
+            
+            if (currentDisplay === '' || currentDisplay === '-') {
+                currentDisplay = '0';
+            }
+            currentEl.value = currentDisplay;
+        }
+
+        function calculate() {
+            let currentDisplay = currentEl.value;
+            
+            // Tratamento prévio caso o usuário digite "X" ou "," via teclado nativo
+            let expression = currentDisplay.replace(/×/g, '*').replace(/,/g, '.');
+            
+            try {
+                let evalResult = eval(expression);
+                if (evalResult === Infinity || isNaN(evalResult)) {
+                    currentEl.value = 'Erro';
+                } else {
+                    operationEl.innerText = currentDisplay + ' =';
+                    currentEl.value = Number(evalResult.toFixed(2)).toString();
+                }
+            } catch {
+                currentEl.value = 'Erro';
+            }
+            isResultDisplayed = true;
+        }
+
+        // Funções do Carrinho de Compras
+        function addToCart() {
+            let currentDisplay = currentEl.value;
+
+            // Se houver uma expressão matemática não resolvida no visor, calcula antes de mandar pro carrinho
+            if (!isResultDisplayed && /[+\-*/]/.test(currentDisplay)) {
+                calculate();
+                currentDisplay = currentEl.value;
+            }
+
+            const price = parseFloat(currentDisplay);
+            if (isNaN(price) || price <= 0 || currentDisplay === 'Erro') {
+                alert('Por favor, insira ou calcule um valor válido maior que zero.');
+                return;
+            }
+
+            let name = inputName.value.trim();
+            if (!name) name = `Item ${cart.length + 1}`; 
+            
+            let qty = parseInt(inputQty.value) || 1;
+            if (qty <= 0) qty = 1;
+
+            const finalPrice = price * qty;
+
+            const item = {
+                id: Date.now(),
+                name: name,
+                qty: qty,
+                unitPrice: price,
+                totalPrice: finalPrice
+            };
+
+            cart.push(item);
+            
+            inputName.value = '';
+            inputQty.value = '1';
+            clearCalc();
+            renderCart();
+        }
+
+        function deleteItem(id) {
+            cart = cart.filter(item => item.id !== id);
+            renderCart();
+        }
+
+        function renderCart() {
+            if (cart.length === 0) {
+                emptyMsg.style.display = 'block';
+                cartListEl.querySelectorAll('.cart-item').forEach(el => el.remove());
+                totalCartEl.innerText = 'R$ 0,00';
+                return;
+            }
+            
+            emptyMsg.style.display = 'none';
+            cartListEl.querySelectorAll('.cart-item').forEach(el => el.remove());
+
+            let totalGeral = 0;
+
+            cart.forEach(item => {
+                totalGeral += item.totalPrice;
+
+                const li = document.createElement('li');
+                li.className = 'cart-item';
+                li.innerHTML = `
+                    <div class="item-info">
+                        <span class="item-name">${item.name}</span>
+                        <span class="item-meta">${item.qty}x de R$ ${item.unitPrice.toFixed(2).replace('.', ',')}</span>
+                    </div>
+                    <div class="item-actions">
+                        <span class="item-price">R$ ${item.totalPrice.toFixed(2).replace('.', ',')}</span>
+                        <button class="btn-delete" onclick="deleteItem(${item.id})">✕</button>
+                    </div>
+                `;
+                cartListEl.appendChild(li);
+            });
+
+            totalCartEl.innerText = `R$ ${totalGeral.toFixed(2).replace('.', ',')}`;
+        }
+    </script>
+</body>
+</html>
